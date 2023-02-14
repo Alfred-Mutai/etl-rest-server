@@ -323,7 +323,9 @@ export class FamilyTestingService {
     return new Promise((resolve, reject) => {
       let queryParts = {};
       let sql =
-        "select uuid from amrs.obs where obs_id = '" + params.contact_id + "'";
+        "select uuid from amrs_migration.obs where obs_id = '" +
+        params.contact_id +
+        "'";
       queryParts = {
         sql: sql
       };

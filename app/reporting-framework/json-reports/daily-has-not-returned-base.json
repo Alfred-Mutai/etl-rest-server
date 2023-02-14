@@ -32,7 +32,7 @@
       }
     },
     {
-      "table": "amrs.person",
+      "table": "amrs_migration.person",
       "alias": "t10",
       "join": {
         "type": "INNER",
@@ -40,7 +40,7 @@
       }
     },
     {
-      "table": "amrs.visit",
+      "table": "amrs_migration.visit",
       "alias": "t20",
       "join": {
         "type": "INNER",
@@ -48,7 +48,7 @@
       }
     },
     {
-      "table": "amrs.patient_identifier",
+      "table": "amrs_migration.patient_identifier",
       "alias": "upi",
       "join": {
         "type": "LEFT",
@@ -56,7 +56,7 @@
       }
     },
     {
-      "table": "amrs.patient_identifier",
+      "table": "amrs_migration.patient_identifier",
       "alias": "ovcid",
       "join": {
         "type": "LEFT",
@@ -64,7 +64,7 @@
       }
     },
     {
-      "table": "amrs.patient_identifier",
+      "table": "amrs_migration.patient_identifier",
       "alias": "ccc",
       "join": {
         "type": "LEFT",
@@ -88,7 +88,7 @@
       }
     },
     {
-      "table": "amrs.program",
+      "table": "amrs_migration.program",
       "alias": "pr",
       "join": {
         "type": "LEFT",

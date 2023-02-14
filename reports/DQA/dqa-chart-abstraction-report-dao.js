@@ -91,16 +91,16 @@ export class DQAChartAbstractionDAO {
           LEFT JOIN
            etl.flat_hiv_summary_v15b ls on (ls.next_clinical_datetime_hiv is null and ls.person_id=e.person_id)
           INNER JOIN
-           amrs.person t1 ON (h.person_id = t1.person_id)
+           amrs_migration.person t1 ON (h.person_id = t1.person_id)
           INNER JOIN 
-          amrs.person_name person_name ON (t1.person_id = person_name.person_id AND (person_name.voided = 0 || person_name.voided = 0))
+          amrs_migration.person_name person_name ON (t1.person_id = person_name.person_id AND (person_name.voided = 0 || person_name.voided = 0))
           LEFT JOIN
-          amrs.patient_identifier id ON (t1.person_id = id.patient_id AND id.voided = 0)
+          amrs_migration.patient_identifier id ON (t1.person_id = id.patient_id AND id.voided = 0)
           LEFT JOIN
-          amrs.patient_identifier cc ON (t1.person_id = cc.patient_id and cc.identifier_type in (28) AND cc.voided = 0)
+          amrs_migration.patient_identifier cc ON (t1.person_id = cc.patient_id and cc.identifier_type in (28) AND cc.voided = 0)
           LEFT JOIN
-          amrs.patient_identifier np ON (t1.person_id = np.patient_id and np.identifier_type in (45) AND np.voided = 0)
-        left join amrs.patient_program p on (p.patient_id = h.person_id and p.program_id in (4,9) and p.date_completed is null and p.voided = 0)
+          amrs_migration.patient_identifier np ON (t1.person_id = np.patient_id and np.identifier_type in (45) AND np.voided = 0)
+        left join amrs_migration.patient_program p on (p.patient_id = h.person_id and p.program_id in (4,9) and p.date_completed is null and p.voided = 0)
         WHERE h.status = "active"
         AND e.height IS NOT NULL
         AND e.weight IS NOT NULL

@@ -18,7 +18,7 @@
       }
     },
     {
-      "table": "amrs.location",
+      "table": "amrs_migration.location",
       "alias": "cl",
       "join": {
         "type": "LEFT",
@@ -26,7 +26,7 @@
       }
     },
     {
-      "table": "amrs.location",
+      "table": "amrs_migration.location",
       "alias": "pl",
       "join": {
         "type": "LEFT",
