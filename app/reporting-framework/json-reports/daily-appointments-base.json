@@ -56,6 +56,14 @@
         "type": "LEFT",
         "joinCondition": "t2.encounter_id  = fhs.encounter_id"
       }
+    },
+    {
+      "table": "etl.flat_hiv_summary_v15b",
+      "alias": "fhsvb",
+      "join": {
+        "type": "LEFT",
+        "joinCondition": "t2.person_id  = fhsvb.person_id and fhsvb.is_clinical_encounter = 1 and fhsvb.next_clinical_datetime_hiv is null"
+      }
     }
   ],
   "columns": [
@@ -134,17 +142,17 @@
     {
       "type": "simple_column",
       "alias": "height",
-      "column": "fhs.height"
+      "column": "fhsvb.height"
     },
     {
       "type": "simple_column",
       "alias": "weight",
-      "column": "fhs.weight"
+      "column": "fhsvb.weight"
     },
     {
       "type": "simple_column",
       "alias": "stage",
-      "column": "fhs.cur_who_stage"
+      "column": "fhsvb.cur_who_stage"
     }
   ],
   "indexDirectives": [
