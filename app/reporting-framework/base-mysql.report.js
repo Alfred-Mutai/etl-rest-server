@@ -384,6 +384,11 @@ import * as txrtt_aggregate_report from './json-reports/tx-reports/tx-rtt/tx-rtt
 import * as txrtt_base_report from './json-reports/tx-reports/tx-rtt/tx-rtt-report-base.json';
 import * as txrtt_summary from './json-reports/txrtt-summary.json';
 
+//gbv report
+import * as gbvphysical_aggregate_report from './json-reports/gbv-reports/physical/aggregate.json';
+import * as gbvphysical_base_report from './json-reports/gbv-reports/physical/base.json';
+import * as gbvphysical_summary from './json-reports/gbvphysical-summary.json';
+
 //plhiv-ncd report
 import * as plhiv_ncd_v2_monthly_report from './json-reports/plhiv-ncd-v2-reports/plhiv-ncd-v2-report.json';
 
@@ -1884,6 +1889,17 @@ export class BaseMysqlReport {
         case 'txrtt-summary-report':
           resolve({
             main: this.cloneJsonSchema(txrtt_summary)
+          });
+          break;
+        case 'gbvPhysicalReportAggregate':
+          resolve({
+            main: this.cloneJsonSchema(gbvphysical_aggregate_report),
+            gbvPhysicalReportBase: this.cloneJsonSchema(gbvphysical_base_report)
+          });
+          break;
+        case 'gbvphysical-summary-report':
+          resolve({
+            main: this.cloneJsonSchema(gbvphysical_summary)
           });
           break;
         case 'plhiv-ncd-v2-monthly-report':
