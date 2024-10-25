@@ -6361,31 +6361,6 @@ module.exports = (function () {
         notes: 'Api endpoint that returns AMRS ID in string format',
         tags: ['api']
       }
-    },
-    {
-      method: 'GET',
-      path: '/etl/registers/defaulter-tracing',
-      config: {
-        auth: 'simple',
-        plugins: {},
-        handler: function (request, reply) {
-          if (request.query.locationUuid) {
-            const locationUuids = request.query.locationUuid;
-            getDefaulterTracingData(locationUuids)
-              .then((results) => {
-                reply(results);
-              })
-              .catch((error) => {
-                reply(Boom.internal('An error occured', error));
-              });
-          } else {
-            reply(Boom.internal('Request misssing location uuid'));
-          }
-        },
-        description: 'Get defaulter tracing data',
-        notes: 'Returns the defaulter tracing data',
-        tags: ['api']
-      }
     }
   ];
 
