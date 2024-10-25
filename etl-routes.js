@@ -82,7 +82,6 @@ import { Covid19MonthlyReport } from './service/covid-19/covid-19-monthly-report
 import { MlWeeklyPredictionsService } from './service/ml-weekly-predictions.service';
 import { getPatientPredictedScore } from './service/predictions/ml-prediction-service';
 import { CohortModuleService } from './app/otz/cohort-module.service';
-import { getDefaulterTracingData } from './service/moh-registers/defaulter-tracing.js';
 
 module.exports = (function () {
   var routes = [
