@@ -52,6 +52,7 @@ import { patientMedicationHistService } from './service/patient-medication-histo
 import { PatientMedicalHistoryService } from './service/patient-medical-history.service';
 
 import { Moh731Report } from './app/reporting-framework/hiv/moh-731.report';
+import { Moh7312023Report } from './app/reporting-framework/hiv/moh-731-2023.report';
 import { BreastCancerMonthlySummaryService } from './service/breast-cancer-monthly-summary.service';
 import { CervicalCancerMonthlySummaryService } from './service/cervical-cancer-monthly-summary.service';
 
@@ -2870,6 +2871,203 @@ module.exports = (function () {
             exclude: Joi.string()
               .optional()
               .description('Validates which report should be returned')
+          }
+        }
+      }
+    },
+    {
+      method: 'GET',
+      path: '/etl/MOH-731-2023-report',
+      config: {
+        auth: 'simple',
+        plugins: {
+          openmrsLocationAuthorizer: {
+            locationParameter: [
+              {
+                type: 'query',
+                name: 'locationUuids'
+              }
+            ],
+            aggregateReport: [
+              {
+                type: 'query',
+                name: 'reportName',
+                value: 'MOH-731-2023'
+              }
+            ]
+          }
+        },
+        handler: function (request, reply) {
+          if (!authorizer.hasReportAccess('MOH-731-report-2017')) {
+            return reply(Boom.forbidden('Unauthorized'));
+          }
+          preRequest.resolveLocationIdsToLocationUuids(request, function () {
+            const requestParams = Object.assign(
+              {},
+              request.query,
+              request.params
+            );
+            const reportParams = etlHelpers.getReportParams(
+              'MOH-731-2023',
+              [
+                'startDate',
+                'endDate',
+                'locationUuids',
+                'locations',
+                'isAggregated'
+              ],
+              requestParams
+            );
+            // getReportParams keeps only the listed params; the section filter
+            // rides along so a caller can ask for one section of the form.
+            reportParams.requestParams.sections = request.query.sections;
+            reportParams.requestParams.debug = request.query.debug;
+
+            const moh731 = new Moh7312023Report(
+              'MOH-731-2023',
+              reportParams.requestParams
+            );
+
+            moh731
+              .generateReport()
+              .then((results) => {
+                reply(results);
+              })
+              .catch((err) => {
+                console.error('MOH 731 2023 report error', err);
+                reply(Boom.internal('An error occured', err));
+              });
+          });
+        },
+        description: 'Get the MOH 731 (Ver. July 2023) report',
+        notes:
+          'Returns the MOH 731 July 2023 form. Sections are computed concurrently and returned keyed by section number; pass ?sections= to compute only some of them.',
+        tags: ['api'],
+        validate: {
+          options: { allowUnknown: true },
+          query: {
+            locationUuids: Joi.string()
+              .optional()
+              .allow('')
+              .description('A list of comma separated location uuids'),
+            startDate: Joi.string()
+              .required()
+              .description('The start date to filter by'),
+            endDate: Joi.string()
+              .required()
+              .description('The end date to filter by'),
+            isAggregated: Joi.boolean()
+              .optional()
+              .description('Boolean checking if report is aggregated'),
+            sections: Joi.string()
+              .optional()
+              .allow('')
+              .description(
+                'Comma separated section numbers of the form to compute, e.g. "3". Defaults to every implemented section.'
+              ),
+            debug: Joi.boolean()
+              .optional()
+              .description(
+                'Returns the sql each part of a section ran and how many rows it gave back.'
+              )
+          }
+        }
+      }
+    },
+    {
+      method: 'GET',
+      path: '/etl/MOH-731-2023-report/patient-list',
+      config: {
+        auth: 'simple',
+        plugins: {
+          hapiAuthorization: {
+            role: privileges.canViewPatient
+          },
+          openmrsLocationAuthorizer: {
+            locationParameter: [
+              {
+                type: 'query',
+                name: 'locationUuids'
+              }
+            ]
+          }
+        },
+        handler: function (request, reply) {
+          if (!authorizer.hasReportAccess('MOH-731-report-2017')) {
+            return reply(Boom.forbidden('Unauthorized'));
+          }
+          preRequest.resolveLocationIdsToLocationUuids(request, function () {
+            const requestParams = Object.assign(
+              {},
+              request.query,
+              request.params
+            );
+            const requestCopy = _.cloneDeep(requestParams);
+            const reportParams = etlHelpers.getReportParams(
+              'MOH-731-2023',
+              [
+                'startDate',
+                'endDate',
+                'locationUuids',
+                'locations',
+                'isAggregated'
+              ],
+              requestParams
+            );
+            requestCopy.locations = reportParams.requestParams.locations;
+            // The caller walks the list a page at a time; these carry the page
+            // it is asking for into the generated query.
+            requestCopy.limitParam = requestParams.limit;
+            requestCopy.offSetParam = requestParams.startIndex;
+
+            const moh731 = new Moh7312023Report('MOH-731-2023', requestCopy);
+            moh731
+              .generatePatientListReport(requestParams.indicator.split(','))
+              .then((results) => {
+                reply(results);
+              })
+              .catch((err) => {
+                console.error('MOH 731 2023 patient list error', err);
+                reply(Boom.internal('An error occured', err));
+              });
+          });
+        },
+        description: 'Get the MOH 731 (Ver. July 2023) patient list',
+        notes:
+          'Returns the patients behind an indicator of the MOH 731 July 2023 report, a page at a time.',
+        tags: ['api'],
+        validate: {
+          // An indicator that is not split by sex sends no gender at all, and a
+          // blank parameter is not the same as an absent one to Joi, so the
+          // optional ones accept blank rather than rejecting the request.
+          options: { allowUnknown: true },
+          query: {
+            indicator: Joi.string()
+              .required()
+              .description('A list of comma separated indicators'),
+            locationUuids: Joi.string()
+              .optional()
+              .allow('')
+              .description('A list of comma separated location uuids'),
+            startDate: Joi.string()
+              .required()
+              .description('The start date to filter by'),
+            endDate: Joi.string()
+              .required()
+              .description('The end date to filter by'),
+            startIndex: Joi.number()
+              .optional()
+              .description('The offset of the page to return'),
+            limit: Joi.number()
+              .optional()
+              .description('How many patients to return'),
+            gender: Joi.string()
+              .optional()
+              .allow('')
+              .description('Gender to filter by'),
+            isAggregated: Joi.boolean()
+              .optional()
+              .description('Boolean checking if report is aggregated')
           }
         }
       }
