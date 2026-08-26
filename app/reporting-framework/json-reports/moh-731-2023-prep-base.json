@@ -1,0 +1,288 @@
+{
+  "name": "Moh7312023PrepBase",
+  "version": "1.0",
+  "tag": "",
+  "description": "Row set behind the PrEP boxes of MOH 731 (Ver. July 2023): 1.3 Initiated on PrEP (NEW), 1.4 on PrEP Diagnosed with STI, 1.5 Seroconverted while on PrEP. One row per person for the month, carrying each box as a conditional so the section costs one pass of the PrEP dataset.",
+  "uses": [],
+  "sources": [
+    {
+      "table": "<<prepMonthlyDatasetSource>>",
+      "alias": "fps"
+    },
+    {
+      "table": "amrs.location",
+      "alias": "l",
+      "join": {
+        "type": "INNER",
+        "joinCondition": "l.location_id = fps.location_id"
+      }
+    },
+    {
+      "comment": "Only the people who have an STI recorded, one row each. The earlier form of this grouped the whole of flat_prep_summary_v1_1 by person with MAX(has_sti), which made the database build a full-table aggregate on every request no matter how narrow the month and location filters were. Filtering first leaves a far smaller set, and has_sti can be indexed.",
+      "table": "(SELECT DISTINCT fp_sti.person_id FROM etl.flat_prep_summary_v1_1 fp_sti WHERE fp_sti.has_sti = 1)",
+      "alias": "fp",
+      "join": {
+        "type": "LEFT",
+        "joinCondition": "fps.person_id = fp.person_id"
+      }
+    }
+  ],
+  "columns": [
+    {
+      "type": "simple_column",
+      "alias": "person_id",
+      "column": "fps.person_id"
+    },
+    {
+      "type": "simple_column",
+      "alias": "location_id",
+      "column": "fps.location_id"
+    },
+    {
+      "type": "simple_column",
+      "alias": "location_uuid",
+      "column": "l.uuid"
+    },
+    {
+      "type": "simple_column",
+      "alias": "location",
+      "column": "l.name"
+    },
+    {
+      "comment": "1.3 Initiated on PrEP (NEW). Newly enrolled this month, by the population type they were enrolled under.",
+      "type": "derived_column",
+      "alias": "prep_new_male_general_pop",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.enrolled_in_prep_this_month = 1 and fps.gender = 'M' and fps.population_type = 3, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_new_female_general_pop",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.enrolled_in_prep_this_month = 1 and fps.gender = 'F' and fps.population_type = 3, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_new_msm",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.enrolled_in_prep_this_month = 1 and fps.gender = 'M' and fps.population_type = 5, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_new_fsw",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.enrolled_in_prep_this_month = 1 and fps.gender = 'F' and fps.population_type = 6, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_new_pwud_male",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.enrolled_in_prep_this_month = 1 and fps.gender = 'M' and fps.population_type = 7, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_new_pwud_female",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.enrolled_in_prep_this_month = 1 and fps.gender = 'F' and fps.population_type = 7, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_new_discordant_male",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.enrolled_in_prep_this_month = 1 and fps.gender = 'M' and fps.population_type = 1, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_new_discordant_female",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.enrolled_in_prep_this_month = 1 and fps.gender = 'F' and fps.population_type = 1, 1, NULL)"
+      }
+    },
+    {
+      "comment": "The legacy 731 definition tests gender = 'F' here, which counts women in the male box and leaves it reading zero. Corrected to 'M'.",
+      "type": "derived_column",
+      "alias": "prep_new_vulnerable_male",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.enrolled_in_prep_this_month = 1 and fps.gender = 'M' and fps.population_type = 8, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_new_vulnerable_female",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.enrolled_in_prep_this_month = 1 and fps.gender = 'F' and fps.population_type = 8, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_new_ayp",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.enrolled_in_prep_this_month = 1 and fps.gender = 'F' and fps.population_type = 11, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_new_preg_breastfeeding",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.enrolled_in_prep_this_month = 1 and fps.gender = 'F' and fps.population_type = 9, 1, NULL)"
+      }
+    },
+    {
+      "comment": "1.4 on PrEP Diagnosed with STI. Everyone on PrEP this month, not only those newly enrolled, since an STI diagnosed months into PrEP still belongs in this box. The STI flag is already one value per person, folded in the joined source above.",
+      "type": "derived_column",
+      "alias": "prep_sti_male_general_pop",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.gender = 'M' and fps.population_type = 3 and fp.person_id is not null, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_sti_female_general_pop",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.gender = 'F' and fps.population_type = 3 and fp.person_id is not null, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_sti_msm",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.gender = 'M' and fps.population_type = 5 and fp.person_id is not null, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_sti_fsw",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.gender = 'F' and fps.population_type = 6 and fp.person_id is not null, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_sti_pwud_male",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.gender = 'M' and fps.population_type = 7 and fp.person_id is not null, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_sti_pwud_female",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.gender = 'F' and fps.population_type = 7 and fp.person_id is not null, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_sti_discordant_male",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.gender = 'M' and fps.population_type = 1 and fp.person_id is not null, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_sti_discordant_female",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.gender = 'F' and fps.population_type = 1 and fp.person_id is not null, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_sti_vulnerable_male",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.gender = 'M' and fps.population_type = 8 and fp.person_id is not null, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_sti_vulnerable_female",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.gender = 'F' and fps.population_type = 8 and fp.person_id is not null, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_sti_ayp",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.gender = 'F' and fps.population_type = 11 and fp.person_id is not null, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "prep_sti_preg_breastfeeding",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.gender = 'F' and fps.population_type = 9 and fp.person_id is not null, 1, NULL)"
+      }
+    },
+    {
+      "comment": "1.5 Seroconverted while on PrEP. Again everyone on PrEP, since seroconversion is not something that happens in the month of enrolment only.",
+      "type": "derived_column",
+      "alias": "seroconverted_male",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.gender = 'M' and fps.turned_positive_this_month = 1, 1, NULL)"
+      }
+    },
+    {
+      "type": "derived_column",
+      "alias": "seroconverted_female",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "if(fps.gender = 'F' and fps.turned_positive_this_month = 1, 1, NULL)"
+      }
+    }
+  ],
+  "filters": {
+    "conditionJoinOperator": "and",
+    "conditions": [
+      {
+        "filterType": "tableColumns",
+        "conditionExpression": "fps.endDate = ?",
+        "parameterName": "endDate"
+      },
+      {
+        "filterType": "tableColumns",
+        "conditionExpression": "fps.location_id in ?",
+        "parameterName": "locations"
+      },
+      {
+        "comment": "Anyone on PrEP in the month: active, newly enrolled, or seroconverted out of it. Narrowing this to enrolled_in_prep_this_month would silently cap 1.4 and 1.5 to new enrolments.",
+        "filterType": "tableColumns",
+        "conditionExpression": "(fps.active_on_prep_this_month = 1 or fps.enrolled_in_prep_this_month = 1 or fps.turned_positive_this_month = 1)"
+      }
+    ]
+  },
+  "groupBy": {
+    "groupParam": "groupByParam",
+    "columns": ["fps.person_id"]
+  }
+}
