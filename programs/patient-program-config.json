@@ -1267,7 +1267,7 @@
     ]
   },
   "781d897a-1359-11df-a1f1-0026b9348838": {
-    "name": "PREVENTION OF MOTHER-TO-CHILD TRANSMISSION OF HIV(pMTCT)",
+    "name": "VERTICAL TRANSMISSION PREVENTION(VTP)",
     "dataDependencies": [
       "patient",
       "enrollment",
