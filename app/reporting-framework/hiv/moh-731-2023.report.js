@@ -1,6 +1,7 @@
 import { MultiDatasetPatientlistReport } from '../multi-dataset-patientlist.report';
 import { Promise } from 'bluebird';
 const Moment = require('moment');
+const etlHelpers = require('../../../etl-helpers');
 
 // Kept identical to the PrEP monthly report's own rule, so the PrEP section
 // here and that report read the same table for the same month.
@@ -147,7 +148,25 @@ export class Moh7312023Report extends MultiDatasetPatientlistReport {
     // unreleased month shows a count off the live table and then a list off the
     // frozen one, and a box reading 1 opens an empty list.
     await this.determineMohReportSourceTables();
-    return super.generatePatientListReport(indicators);
+    const results = await super.generatePatientListReport(indicators);
+    return this.nameThePrepRegimens(results);
+  }
+
+  /**
+   * The regimen reaches the list as concept ids. The PrEP monthly report names
+   * them before replying, so a PrEP box here has to do the same or the same
+   * client reads as a row of numbers in one place and drug names in the other.
+   */
+  nameThePrepRegimens(results) {
+    const rows = (results && results.result) || [];
+    rows.forEach((row) => {
+      if (row && row.cur_prep_meds_names !== undefined) {
+        row.cur_prep_meds_names = etlHelpers.getARVNames(
+          row.cur_prep_meds_names
+        );
+      }
+    });
+    return results;
   }
 
   async generateReport(additionalParams) {

@@ -784,7 +784,10 @@ export class BaseMysqlReport {
         case 'Moh7312023PrepAggregation':
           resolve({
             main: this.cloneJsonSchema(moh_731_2023_prep),
-            Moh7312023PrepBase: this.cloneJsonSchema(moh_731_2023_prep_base)
+            Moh7312023PrepBase: this.cloneJsonSchema(moh_731_2023_prep_base),
+            prepLatestClinicalEncounterDate: this.cloneJsonSchema(
+              prep_latest_clinical_encounter_date_base
+            )
           });
           break;
         case 'moh-731-2023-patient-list-template':

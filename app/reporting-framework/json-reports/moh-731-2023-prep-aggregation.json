@@ -262,7 +262,7 @@
   },
   "dynamicJsonQueryGenerationDirectives": {
     "patientListGenerator": {
-      "useTemplate": "moh-731-2023-patient-list-template",
+      "useTemplate": "prep-report-patient-list-template",
       "useTemplateVersion": "1.0",
       "generatingDirectives": {
         "joinDirectives": {
